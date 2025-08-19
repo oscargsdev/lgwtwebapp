@@ -106,30 +106,12 @@ func TestLeague(t *testing.T) {
 		server.ServeHTTP(response, request)
 
 		assertStatus(t, response.Code, http.StatusOK)
+
 		got := getLeagueFromResponse(t, response.Body)
-
 		assertLeague(t, got, wantedLeague)
+
+		assertContentType(t, response, jsonContentType)
 	})
-}
-
-func newLeagueRequest() *http.Request {
-	request, _ := http.NewRequest(http.MethodGet, "/league", nil)
-	return request
-}
-
-func getLeagueFromResponse(t *testing.T, body io.Reader) (league []Player) {
-	t.Helper()
-
-	err := json.NewDecoder(body).Decode(&league)
-	if err != nil {
-		t.Fatalf(
-			"Unable to parse response from server %q into slice of Player, '%v'",
-			body,
-			err,
-		)
-	}
-
-	return
 }
 
 func assertLeague(t testing.TB, got, want []Player) {
@@ -177,5 +159,36 @@ func assertStatus(t testing.TB, got, want int) {
 	t.Helper()
 	if got != want {
 		t.Errorf("did not get correct status, got %d want %d", got, want)
+	}
+}
+
+func newLeagueRequest() *http.Request {
+	request, _ := http.NewRequest(http.MethodGet, "/league", nil)
+	return request
+}
+
+func getLeagueFromResponse(t *testing.T, body io.Reader) (league []Player) {
+	t.Helper()
+
+	err := json.NewDecoder(body).Decode(&league)
+	if err != nil {
+		t.Fatalf(
+			"Unable to parse response from server %q into slice of Player, '%v'",
+			body,
+			err,
+		)
+	}
+
+	return
+}
+
+func assertContentType(t testing.TB, response *httptest.ResponseRecorder, want string) {
+	t.Helper()
+
+	if response.Result().Header.Get("content-type") != "application/json" {
+		t.Errorf(
+			"response did not have content-type of application/json, got %v",
+			response.Result().Header,
+		)
 	}
 }
