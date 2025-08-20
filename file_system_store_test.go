@@ -26,4 +26,25 @@ func TestFileSystemStore(t *testing.T) {
 		got = store.GetLeague()
 		assertLeague(t, got, want)
 	})
+
+	t.Run("get player score", func(t *testing.T) {
+		database := strings.NewReader(`[
+			{"Name": "Vane", "Wins": 10},
+			{"Name": "Oscar", "Wins": 33}
+			]`)
+
+		store := FileSystemPlayerStore{database}
+
+		got := store.GetPlayerScore("Oscar")
+		want := 33
+		asseretScoreEquals(t, got, want)
+	})
+}
+
+func asseretScoreEquals(t testing.TB, got, want int) {
+	t.Helper()
+
+	if got != want {
+		t.Errorf("got %d want %d", got, want)
+	}
 }
